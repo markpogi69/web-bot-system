@@ -1,20 +1,30 @@
-const axios = require('axios');
+const axios = require('axios')
+const config = require('../config.json')
 
 module.exports = {
-  command: 'ai',
-  description: 'Ask AI a question',
-  async execute(args) {
-    if (args.length === 0) {
-      return 'Please ask a question after /ai';
+    name: 'ai',
+    description: 'Ask AI a question',
+    usage: `${config.prefix}ai <question>`,
+    examples: [
+        `${config.prefix}ai What is the meaning of life?`,
+        `${config.prefix}ai How does photosynthesis work?`
+    ],
+    async execute(args) {
+        if (!args.length) {
+            throw new Error(`Please provide a question. Usage: ${this.usage}`)
+        }
+
+        const question = args.join(' ')
+        
+        try {
+            const response = await axios.get(`${config.aiEndpoint}/gpt?q=${encodeURIComponent(question)}`)
+            return response.data.message || 'AI provided no response'
+        } catch (error) {
+            console.error('AI Command Error:', error.message)
+            if (error.response) {
+                throw new Error(`AI service error: ${error.response.status}`)
+            }
+            throw new Error('Failed to connect to AI service')
+        }
     }
-    const question = args.join(' ');
-    try {
-      const response = await axios.get(`https://api.shizuki.linkpc.net/api/gpt?q=${encodeURIComponent(question)}`);
-      const data = await response.json();
-      return data.message || 'No response from AI';
-    } catch (error) {
-      console.error('AI Error:', error);
-      return 'Sorry, could not get AI response';
-    }
-  }
-};
+}
