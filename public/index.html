@@ -3,35 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Chatbot</title>
+    <title>AI Chatbot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-    <div class="chat-container">
-        <div class="chat-box" id="chatBox"></div>
-        <div class="input-area">
-            <input type="text" id="userInput" placeholder="Type a command (e.g., /help)">
-            <button onclick="sendMessage()">Send</button>
-        </div>
+    <div class="app-container">
+        <nav class="sidebar">
+            <div class="nav-header">
+                <button class="new-chat">
+                    <i class="fas fa-plus"></i>
+                    New Chat
+                </button>
+            </div>
+            <div class="nav-body">
+                <div class="chat-history">
+                    <div class="history-item active">
+                        <i class="fas fa-message"></i>
+                        New Conversation
+                    </div>
+                </div>
+            </div>
+            <div class="nav-footer">
+                <button class="clear-chats">
+                    <i class="fas fa-trash"></i>
+                    Clear Conversations
+                </button>
+            </div>
+        </nav>
+
+        <main class="chat-main">
+            <div class="chat-header">
+                <h1>AI Assistant</h1>
+            </div>
+
+            <div class="chat-container">
+                <div class="chat-box" id="chatBox">
+                    <div class="welcome-message">
+                        <h2>How can I help you today?</h2>
+                        <p>Type /help to see available commands</p>
+                    </div>
+                </div>
+
+                <div class="input-container">
+                    <div class="input-area">
+                        <textarea id="userInput" rows="1" placeholder="Type a message or use commands (e.g., /help)"></textarea>
+                        <button class="send-button" onclick="sendMessage()">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    <div class="input-footer">
+                        <span>AI Assistant can make mistakes. Consider checking important information.</span>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
+
     <script>
         const chatBox = document.getElementById('chatBox');
         const userInput = document.getElementById('userInput');
 
         function addMessage(message, isBot = false) {
             const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isBot ? 'bot' : 'user'}`;
-            messageDiv.textContent = message;
+            messageDiv.className = `message-wrapper ${isBot ? 'bot' : 'user'}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.innerHTML = isBot ? '<i class="fas fa-robot"></i>' : '<i class="fas fa-user"></i>';
+            
+            const textDiv = document.createElement('div');
+            textDiv.className = 'message-text';
+            textDiv.textContent = message;
+            
+            contentDiv.appendChild(avatar);
+            contentDiv.appendChild(textDiv);
+            messageDiv.appendChild(contentDiv);
             chatBox.appendChild(messageDiv);
+            
             chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function adjustTextareaHeight() {
+            userInput.style.height = 'auto';
+            userInput.style.height = userInput.scrollHeight + 'px';
         }
 
         async function sendMessage() {
             const message = userInput.value.trim();
             if (!message) return;
-
+            
             addMessage(message);
             userInput.value = '';
+            adjustTextareaHeight();
 
             try {
                 const response = await fetch('/bot', {
@@ -41,19 +108,29 @@
                     },
                     body: JSON.stringify({ message }),
                 });
-
                 const data = await response.json();
                 addMessage(data.response, true);
             } catch (error) {
                 console.error('Error:', error);
-                addMessage('Sorry, something went wrong!', true);
+                addMessage('An error occurred while processing your request.', true);
             }
         }
 
         userInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
                 sendMessage();
             }
+        });
+
+        userInput.addEventListener('input', adjustTextareaHeight);
+        
+        document.querySelector('.clear-chats').addEventListener('click', () => {
+            chatBox.innerHTML = '';
+            const welcomeDiv = document.createElement('div');
+            welcomeDiv.className = 'welcome-message';
+            welcomeDiv.innerHTML = '<h2>How can I help you today?</h2><p>Type /help to see available commands</p>';
+            chatBox.appendChild(welcomeDiv);
         });
     </script>
 </body>
