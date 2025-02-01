@@ -1,0 +1,8 @@
+{
+    "port": 3000,
+    "prefix": "/",
+    "aiEndpoint": "https://api.shizuki.linkpc.net/api/gpt",
+    "commandsPath": "./commands",
+    "botName": "ChatBot",
+    "version": "1.0.0"
+}
