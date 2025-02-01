@@ -63,6 +63,13 @@
             line-height: 1.4;
         }
 
+        .message video {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
         .bot-message {
             background: var(--message-bg);
             align-self: flex-start;
@@ -123,32 +130,6 @@
             cursor: not-allowed;
         }
 
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 48px;
-            background: var(--bg-color);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border-top: 1px solid #333;
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-
-        .nav-button {
-            width: 48px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-color);
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-        }
-
         @media (min-width: 768px) {
             .message {
                 max-width: 60%;
@@ -194,10 +175,24 @@
 
         sendButton.addEventListener('click', sendMessage);
 
+        function isVideoUrl(url) {
+            return url.match(/\.(mp4|webm|ogg)$/i) || url.includes('youtube.com') || url.includes('youtu.be');
+        }
+
         function addMessage(content, type) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${type}-message`;
-            messageDiv.textContent = content;
+
+            if (type === 'bot' && isVideoUrl(content)) {
+                const video = document.createElement('video');
+                video.controls = true;
+                video.src = content;
+                messageDiv.textContent = "Here's a video for you:";
+                messageDiv.appendChild(video);
+            } else {
+                messageDiv.textContent = content;
+            }
+
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
@@ -224,7 +219,12 @@
                 if (data.error) {
                     addMessage('Error processing request', 'error');
                 } else {
-                    addMessage(data.response, 'bot');
+                    if (data.response) {
+                        addMessage(data.response, 'bot');
+                    }
+                    if (data.video) {
+                        addMessage(data.video, 'bot');
+                    }
                 }
             } catch (error) {
                 addMessage('Error processing request', 'error');
