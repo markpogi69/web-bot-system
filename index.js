@@ -1,59 +1,62 @@
-const express = require('express');
-const path = require('path');
-const fs = require('fs');
-const axios = require('axios');
+const express = require('express')
+const path = require('path')
+const fs = require('fs')
+const config = require('./config.json')
+const app = express()
+const PORT = config.port || 3000
 
-const app = express();
-const PORT = 3000;
+app.use(express.static('public'))
+app.use(express.json())
 
-// Middleware
-app.use(express.static('public'));
-app.use(express.json());
-
-// Load commands
-const commands = [];
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+const commands = new Map()
+const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'))
 
 for (const file of commandFiles) {
-    const command = require(`./commands/${file}`);
-    commands.push(command);
+    const command = require(`./commands/${file}`)
+    commands.set(command.name, command)
 }
 
-// Bot endpoint
 app.post('/bot', async (req, res) => {
-    const message = req.body.message?.trim();
-
+    const message = req.body.message?.trim()
+    
     if (!message) {
-        return res.json({ response: 'Please send a message' });
+        return res.status(400).json({ error: 'Message is required' })
     }
 
-    if (message.startsWith('/')) {
-        const [commandName, ...args] = message.slice(1).split(' ');
-        const command = commands.find(cmd => cmd.command === commandName.toLowerCase());
+    if (message.startsWith(config.prefix)) {
+        const args = message.slice(config.prefix.length).trim().split(/ +/)
+        const commandName = args.shift().toLowerCase()
+        const command = commands.get(commandName)
 
-        if (command) {
-            try {
-                const response = await command.execute(args, commands);
-                return res.json({ response });
-            } catch (error) {
-                console.error('Command error:', error);
-                return res.json({ response: 'An error occurred executing the command' });
-            }
+        if (!command) {
+            return res.json({ 
+                response: `Unknown command. Use ${config.prefix}help to see available commands.` 
+            })
         }
-        return res.json({ response: 'Unknown command. Type /help to see available commands.' });
+
+        try {
+            const response = await command.execute(args, commands)
+            return res.json({ response })
+        } catch (error) {
+            console.error(`Error executing ${commandName}:`, error)
+            return res.status(500).json({ 
+                error: 'Command execution failed' 
+            })
+        }
     }
 
-    // Default AI response for non-commands
     try {
-        const response = await axios.get(`https://api.shizuki.linkpc.net/api/gpt?q=${encodeURIComponent(message)}`);
-        const data = await response.json();
-        return res.json({ response: data.message || 'No response from AI' });
+        return res.json({ 
+            response: "Please use a command with prefix '/'. Type /help for available commands." 
+        })
     } catch (error) {
-        console.error('AI Error:', error);
-        return res.json({ response: 'Sorry, I could not process that message' });
+        console.error('Server Error:', error)
+        return res.status(500).json({ 
+            error: 'Internal server error' 
+        })
     }
-});
+})
 
 app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
-});
+    console.log(`Server running on port ${PORT}`)
+})
