@@ -3,262 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Chat Bot</title>
+    <title>CHATBOT</title>
     <style>
         :root {
-            --primary-color: #2563eb;
-            --secondary-color: #1e40af;
-            --accent-color: #3b82f6;
-            --bg-color: #f1f5f9;
-            --text-color: #1e293b;
-            --border-color: #e2e8f0;
-            --message-bg: #ffffff;
-            --bot-message-bg: #f8fafc;
-            --shadow-color: rgba(0, 0, 0, 0.1);
+            --bg-color: #1A1A1A;
+            --input-bg: #2A2A2A;
+            --button-color: #404040;
+            --text-color: #FFFFFF;
+            --message-bg: #2D2D2D;
+            --user-message-bg: #404040;
+            --error-bg: #2D2D2D;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
-            min-height: 100vh;
+            height: 100vh;
             display: flex;
             flex-direction: column;
+        }
+
+        .header {
+            padding: 1rem;
+            text-align: center;
+            background-color: var(--bg-color);
+            border-bottom: 1px solid #333;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 500;
         }
 
         .chat-container {
-            max-width: 1400px;
-            margin: 0 auto;
+            flex: 1;
+            overflow-y: auto;
             padding: 1rem;
-            flex-grow: 1;
-            width: 100%;
             display: flex;
             flex-direction: column;
-            height: 100vh;
-        }
-
-        .chat-header {
-            text-align: center;
-            padding: 1.5rem;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            border-radius: 16px 16px 0 0;
-            box-shadow: 0 4px 6px var(--shadow-color);
-            position: relative;
-            z-index: 2;
-        }
-
-        .chat-header h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .chat-messages {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 2rem;
-            background: var(--message-bg);
-            border: 1px solid var(--border-color);
-            border-top: none;
-            border-bottom: none;
-            height: calc(100vh - 200px);
-            scroll-behavior: smooth;
+            gap: 1rem;
+            padding-bottom: 80px;
         }
 
         .message {
-            margin-bottom: 1.5rem;
-            padding: 1rem;
-            border-radius: 16px;
             max-width: 85%;
-            animation: messageSlide 0.3s ease-out;
-            box-shadow: 0 2px 4px var(--shadow-color);
-            position: relative;
-            line-height: 1.5;
-        }
-
-        .user-message {
-            background: var(--primary-color);
-            color: white;
-            margin-left: auto;
-            border-bottom-right-radius: 4px;
+            padding: 1rem;
+            border-radius: 1rem;
+            font-size: 1rem;
+            line-height: 1.4;
         }
 
         .bot-message {
-            background: var(--bot-message-bg);
-            color: var(--text-color);
-            margin-right: auto;
-            border-bottom-left-radius: 4px;
+            background: var(--message-bg);
+            align-self: flex-start;
         }
 
-        .bot-message img {
-            max-width: 100%;
-            border-radius: 12px;
-            margin-top: 1rem;
-            box-shadow: 0 2px 8px var(--shadow-color);
+        .user-message {
+            background: var(--user-message-bg);
+            align-self: flex-end;
         }
 
-        .message-timestamp {
-            font-size: 0.75rem;
-            opacity: 0.7;
-            margin-top: 0.5rem;
-            text-align: right;
+        .error-message {
+            background: var(--error-bg);
+            align-self: flex-start;
         }
 
         .input-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem;
+            background: var(--bg-color);
             display: flex;
-            gap: 1rem;
-            padding: 1.5rem;
-            background: white;
-            border: 1px solid var(--border-color);
-            border-radius: 0 0 16px 16px;
-            box-shadow: 0 -4px 6px var(--shadow-color);
-            position: relative;
-            z-index: 2;
+            gap: 0.5rem;
+            border-top: 1px solid #333;
         }
 
         .message-input {
-            flex-grow: 1;
-            padding: 1rem 1.5rem;
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-            box-shadow: inset 0 2px 4px var(--shadow-color);
+            flex: 1;
+            padding: 0.8rem 1rem;
+            border-radius: 1.5rem;
+            border: none;
+            background: var(--input-bg);
+            color: var(--text-color);
+            font-size: 1rem;
         }
 
         .message-input:focus {
             outline: none;
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
         .send-button {
-            padding: 1rem 2rem;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
             border: none;
-            border-radius: 12px;
+            background: var(--button-color);
+            color: var(--text-color);
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 2px 4px var(--shadow-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
         }
 
-        .send-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px var(--shadow-color);
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
-        .send-button:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 4px var(--shadow-color);
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 48px;
+            background: var(--bg-color);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid #333;
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
-        @keyframes messageSlide {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .nav-button {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-color);
+            background: none;
+            border: none;
+            font-size: 1.5rem;
         }
 
-        .typing-indicator {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            background: var(--bot-message-bg);
-            border-radius: 12px;
-            margin-bottom: 1rem;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 0.4; }
-            50% { opacity: 1; }
-            100% { opacity: 0.4; }
-        }
-
-        @media (max-width: 768px) {
-            .chat-container {
-                padding: 0.5rem;
-                height: 100vh;
-            }
-
-            .chat-header {
-                padding: 1rem;
-                border-radius: 12px 12px 0 0;
-            }
-
-            .chat-header h1 {
-                font-size: 1.5rem;
-            }
-
-            .chat-messages {
-                padding: 1rem;
-                height: calc(100vh - 160px);
-            }
-
+        @media (min-width: 768px) {
             .message {
-                max-width: 90%;
-                padding: 0.875rem;
-                font-size: 0.95rem;
-            }
-
-            .input-container {
-                padding: 1rem;
-            }
-
-            .message-input {
-                padding: 0.875rem;
-                font-size: 1rem;
-            }
-
-            .send-button {
-                padding: 0.875rem 1.5rem;
-                font-size: 1rem;
-            }
-        }
-
-        @media (min-width: 1024px) {
-            .message {
-                max-width: 70%;
-            }
-        }
-
-        @media (min-width: 1536px) {
-            .chat-container {
-                max-width: 1600px;
+                max-width: 60%;
             }
         }
     </style>
 </head>
 <body>
-    <div class="chat-container">
-        <div class="chat-header">
-            <h1>AI</h1>
+    <div class="header">
+        <h1>CHATBOT</h1>
+    </div>
+    
+    <div class="chat-container" id="chatMessages">
+        <div class="message bot-message">
+            Hi there! How can I help you today?
         </div>
-        <div class="chat-messages" id="chatMessages"></div>
-        <div class="input-container">
-            <input type="text" id="messageInput" class="message-input" placeholder="Type your message...">
-            <button class="send-button" onclick="sendMessage()">Send</button>
-        </div>
+    </div>
+
+    <div class="input-container">
+        <input 
+            type="text" 
+            class="message-input" 
+            id="messageInput" 
+            placeholder="Type your message..."
+        >
+        <button class="send-button" id="sendButton">→</button>
     </div>
 
     <script>
         const chatMessages = document.getElementById('chatMessages');
         const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
 
         messageInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
@@ -266,61 +188,27 @@
             }
         });
 
-        function formatTimestamp() {
-            return new Intl.DateTimeFormat('en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true
-            }).format(new Date());
-        }
+        messageInput.addEventListener('input', () => {
+            sendButton.disabled = !messageInput.value.trim();
+        });
 
-        function isBase64Image(str) {
-            try {
-                return str.startsWith('data:image');
-            } catch {
-                return false;
-            }
-        }
+        sendButton.addEventListener('click', sendMessage);
 
-        function addMessage(content, isUser = false) {
+        function addMessage(content, type) {
             const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
-            
-            if (isBase64Image(content) && !isUser) {
-                const img = document.createElement('img');
-                img.src = content;
-                img.alt = 'Bot response image';
-                messageDiv.appendChild(img);
-            } else {
-                messageDiv.textContent = content;
-            }
-
-            const timestamp = document.createElement('div');
-            timestamp.className = 'message-timestamp';
-            timestamp.textContent = formatTimestamp();
-            messageDiv.appendChild(timestamp);
-
+            messageDiv.className = `message ${type}-message`;
+            messageDiv.textContent = content;
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function showTypingIndicator() {
-            const indicator = document.createElement('div');
-            indicator.className = 'typing-indicator';
-            indicator.textContent = 'Bot is typing...';
-            chatMessages.appendChild(indicator);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-            return indicator;
         }
 
         async function sendMessage() {
             const message = messageInput.value.trim();
             if (!message) return;
 
-            addMessage(message, true);
+            addMessage(message, 'user');
             messageInput.value = '';
-
-            const typingIndicator = showTypingIndicator();
+            sendButton.disabled = true;
 
             try {
                 const response = await fetch('/bot', {
@@ -331,24 +219,19 @@
                     body: JSON.stringify({ message })
                 });
 
-                typingIndicator.remove();
                 const data = await response.json();
                 
                 if (data.error) {
-                    addMessage(`Error: ${data.error}`, false);
+                    addMessage('Error processing request', 'error');
                 } else {
-                    if (data.response) {
-                        addMessage(data.response, false);
-                    }
-                    if (data.image) {
-                        addMessage(data.image, false);
-                    }
+                    addMessage(data.response, 'bot');
                 }
             } catch (error) {
-                typingIndicator.remove();
-                addMessage('Sorry, there was an error processing your message.', false);
+                addMessage('Error processing request', 'error');
             }
         }
+
+        sendButton.disabled = true;
     </script>
 </body>
 </html>
