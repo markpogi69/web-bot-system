@@ -175,19 +175,15 @@
 
         sendButton.addEventListener('click', sendMessage);
 
-        function isVideoUrl(url) {
-            return url.match(/\.(mp4|webm|ogg)$/i) || url.includes('youtube.com') || url.includes('youtu.be');
-        }
-
-        function addMessage(content, type) {
+        function addMessage(content, type, videoUrl = null) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${type}-message`;
-
-            if (type === 'bot' && isVideoUrl(content)) {
+            
+            if (type === 'bot' && videoUrl) {
                 const video = document.createElement('video');
                 video.controls = true;
-                video.src = content;
-                messageDiv.textContent = "Here's a video for you:";
+                video.src = videoUrl;
+                messageDiv.textContent = content;
                 messageDiv.appendChild(video);
             } else {
                 messageDiv.textContent = content;
@@ -222,8 +218,8 @@
                     if (data.response) {
                         addMessage(data.response, 'bot');
                     }
-                    if (data.video) {
-                        addMessage(data.video, 'bot');
+                    if (data.video && data.video.url) {
+                        addMessage("Here's a video for you:", 'bot', data.video.url);
                     }
                 }
             } catch (error) {
