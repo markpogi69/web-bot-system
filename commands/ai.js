@@ -1,4 +1,4 @@
-const fetch = require('node-fetch');
+const axios = require('axios');
 
 module.exports = {
   command: 'ai',
@@ -9,7 +9,7 @@ module.exports = {
     }
     const question = args.join(' ');
     try {
-      const response = await fetch(`https://zvik-api-rest.onrender.com/api/gpt?q=${encodeURIComponent(question)}`);
+      const response = await axios.get(`https://api.shizuki.linkpc.net/api/gpt?q=${encodeURIComponent(question)}`);
       const data = await response.json();
       return data.message || 'No response from AI';
     } catch (error) {
