@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const fetch = require('node-fetch');
+const axios = require('axios');
 
 const app = express();
 const PORT = 3000;
@@ -45,7 +45,7 @@ app.post('/bot', async (req, res) => {
 
     // Default AI response for non-commands
     try {
-        const response = await fetch(`https://zvik-api-rest.onrender.com/api/gpt?q=${encodeURIComponent(message)}`);
+        const response = await axios.get(`https://api.shizuki.linkpc.net/api/gpt?q=${encodeURIComponent(message)}`);
         const data = await response.json();
         return res.json({ response: data.message || 'No response from AI' });
     } catch (error) {
